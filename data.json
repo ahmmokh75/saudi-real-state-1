@@ -8,7 +8,7 @@
     },
     {
       "id": 2,
-      "name": "جدة",
+      "name": "جدة", 
       "totalProjects": 6,
       "color": "jeddah"
     },
@@ -26,14 +26,26 @@
         "name": "SLY-1001",
         "location": "الرياض - حي الصحافة",
         "totalApartments": 10
+      },
+      {
+        "id": 2,
+        "name": "SLY-1002",
+        "location": "الرياض - حي النخيل", 
+        "totalApartments": 24
       }
     ],
     "umh": [
       {
         "id": 1,
         "name": "UMH-1001",
-        "location": "الرياض - حي الملز", 
+        "location": "الرياض - حي الملز",
         "totalApartments": 12
+      },
+      {
+        "id": 2, 
+        "name": "UMH-1002",
+        "location": "الرياض - حي النسيم",
+        "totalApartments": 18
       }
     ]
   }
