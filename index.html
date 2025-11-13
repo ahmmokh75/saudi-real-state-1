@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة العقارات السعودي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .city-card {
+            background: white;
+            border-radius: 10px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            border: 2px solid transparent;
+        }
+        
+        .riyadh-card {
+            border-color: #1e3c72;
+            background: linear-gradient(135deg, #ffffff, #f0f4ff);
+        }
+        
+        .jeddah-card {
+            border-color: #00a86b;
+            background: linear-gradient(135deg, #ffffff, #f0fff8);
+        }
+        
+        .dammam-card {
+            border-color: #ff9900;
+            background: linear-gradient(135deg, #ffffff, #fff8f0);
+        }
+        
+        .city-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .city-name {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .riyadh-card .city-name {
+            color: #1e3c72;
+        }
+        
+        .jeddah-card .city-name {
+            color: #00a86b;
+        }
+        
+        .dammam-card .city-name {
+            color: #ff9900;
+        }
+        
+        .projects-count {
+            display: inline-block;
+            background: #e6f7ee;
+            color: #00a86b;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .status-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .error {
+            color: #ff4d4d;
+            background: #ffe6e6;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            border: 1px solid #ff4d4d;
+        }
+        
+        .debug-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🇸🇦 نظام إدارة المشاريع العقارية السعودي</h1>
+            <p>التحديث التلقائي - لا يحتاج إعادة إرسال 🚀</p>
+        </header>
+        
+        <div class="status-bar">
+            <span style="color: #00a86b; font-weight: bold;">🔄 التحديث التلقائي مفعل</span> | 
+            آخر تحديث: <span id="lastUpdate">--</span>
+        </div>
+        
+        <div id="messageContainer"></div>
+        
+        <div id="debugContainer"></div>
+        
+        <div id="citiesPage">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2a5298;">🏙️ مدن السعودية</h2>
+            <div class="cities-grid" id="citiesContainer">
+                <div class="loading">📡 جاري تحميل البيانات...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥
+        // استبدل "YourUsername" باسم مستخدمك الحقيقي على GitHub
+        // مثال: إذا كان اسمك "ahmed2024" اكتبه بدلاً من YourUsername
+        // 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥
+        const GITHUB_USERNAME = 'YourUsername'; // غير هذا فقط!
+        const GITHUB_DATA_URL = `https://raw.githubusercontent.com/${ahmmokh75}/saudi-real-estate/main/data.json`;
+        // 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥 🔥
+
+        const UPDATE_INTERVAL = 30000;
+        let currentData = null;
+
+        // عرض معلومات التصحيح
+        function showDebugInfo() {
+            const debugContainer = document.getElementById('debugContainer');
+            debugContainer.innerHTML = `
+                <div class="debug-info">
+                    <strong>🔧 معلومات التصحيح:</strong><br>
+                    - اسم المستخدم: ${GITHUB_USERNAME}<br>
+                    - رابط البيانات: <a href="${GITHUB_DATA_URL}" target="_blank">${GITHUB_DATA_URL}</a><br>
+                    - افحص الرابط أعلاه، إذا ظهر 404 غير اسم المستخدم
+                </div>
+            `;
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            if (type === 'error') {
+                container.innerHTML = `<div class="error">${message}</div>`;
+            } else {
+                container.innerHTML = `<div class="loading">${message}</div>`;
+            }
+        }
+
+        async function loadDataFromGitHub() {
+            try {
+                showMessage('🔄 جاري تحميل البيانات...', 'loading');
+                showDebugInfo();
+                
+                const response = await fetch(GITHUB_DATA_URL);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('الملف غير موجود! تأكد من:<br>1. اسم المستخدم صحيح<br>2. ملف data.json موجود<br>3. اسم المستودع "saudi-real-estate"');
+                    }
+                    throw new Error(`خطأ ${response.status}: ${response.statusText}`);
+                }
+                
+                const newData = await response.json();
+                
+                if (JSON.stringify(newData) !== JSON.stringify(currentData)) {
+                    currentData = newData;
+                    renderCities(newData.cities);
+                    showMessage('✅ تم تحميل البيانات بنجاح', 'success');
+                }
+                
+                updateUIInfo();
+                
+            } catch (error) {
+                console.error('❌ خطأ:', error);
+                showMessage(`❌ ${error.message}`, 'error');
+                
+                document.getElementById('citiesContainer').innerHTML = `
+                    <div class="error">
+                        <strong>🚨 خطأ 404 - الملف غير موجود</strong><br><br>
+                        <strong>🔧 الحل:</strong><br>
+                        1. اذهب إلى <a href="https://github.com/${GITHUB_USERNAME}/saudi-real-estate" target="_blank">مستودعك على GitHub</a><br>
+                        2. تأكد من وجود ملف "data.json"<br>
+                        3. إذا لم يكن موجوداً، أنشئه بالضغط على "Add file" → "Create new file"<br>
+                        4. اسم الملف: <strong>data.json</strong><br>
+                        5. الصق محتوى JSON في الأسفل
+                    </div>
+                `;
+            }
+        }
+
+        function renderCities(cities) {
+            const container = document.getElementById('citiesContainer');
+            
+            if (!cities || cities.length === 0) {
+                container.innerHTML = '<div class="loading">🏜️ لا توجد بيانات مدن</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            cities.forEach(city => {
+                const card = document.createElement('div');
+                card.className = `city-card ${city.color}-card`;
+                card.onclick = () => alert(`مدينة: ${city.name}\nالمشاريع: ${city.totalProjects}`);
+                
+                card.innerHTML = `
+                    <div class="city-name">${city.name}</div>
+                    <div class="projects-count">${city.totalProjects} مشروع</div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        function updateUIInfo() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString();
+        }
+
+        // البدء
+        showDebugInfo();
+        loadDataFromGitHub();
+        setInterval(loadDataFromGitHub, UPDATE_INTERVAL);
+    </script>
+</body>
+</html>
